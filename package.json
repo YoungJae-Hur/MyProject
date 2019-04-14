@@ -1,5 +1,5 @@
 {
-  "name": "myproject",
+  "name": "Server_side_javascript",
   "version": "1.0.0",
   "description": "Server side javascript tutorials",
   "main": "main.js",
@@ -10,10 +10,15 @@
     "type": "git",
     "url": "git+https://github.com/YoungJae-Hur/MyProject.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Youngjae Hur",
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/YoungJae-Hur/MyProject/issues"
   },
-  "homepage": "https://github.com/YoungJae-Hur/MyProject#readme"
+  "homepage": "https://github.com/YoungJae-Hur/MyProject#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "jade": "^1.11.0",
+    "underscore": "^1.9.1"
+  }
 }
