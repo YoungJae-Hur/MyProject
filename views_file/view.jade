@@ -4,14 +4,18 @@ html
 		meta(charset='utf-8')
 	body
 		h1 
-			a(href='/topic') Server Side JavaScript
+			a(href='/') Server Side JavaScript
 		ul
 			each val in topics
 				li
-					a(href='/topic/'+val)= val
+					a(href='/'+val.title)= val.title
+		div 
+			a(href='/new') 
+				button(type="button") Create new post
+			
+			a(href='/update/'+title)
+				button(type="button") Modify 
 		artcle
 			h2= title
 			= description
-		div 
-			a(href='/topic/new') 
-				button(type="button") Create new post 
+		
