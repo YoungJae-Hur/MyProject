@@ -29,34 +29,52 @@ app.get('/new', function(req, res){
 	db.query(sql3, function(err, files){
 		if(err){
 			console.log(err);
-			res.status(500).send('Internal Server Error1');
+			res.status(500).send('Internal Server Error:1');
 		}
 		res.render('new', {topics:files});
 	});
-	//});
 });
 
-// Updates the contents of a title 
+// moves to updating the contents of a title 
 app.get('/update/:id', function(req, res){
 	var sql4 = 'select * from topic'; 
 	db.query(sql4, function(err, files){
 		if(err){
 			console.log(err); 
-			res.status(500).send('Internal Server Error5');
+			res.status(500).send('Internal Server Error:5');
 		}
 		var id = req.params.id; // id is title 
 		
-		var sql5 = '';
-		//db.query(sql5, [], function(err, data){
-		//	if(err){
-		//		console.log(err); 
-		//		res.status(500).send('Internal Server Error6');
-		//	}
-		res.render('update', {topics:files, title:'Let"s modify!', description:'First, choose the title to modify'});
-		//});
+		var sql5 = 'SELECT description FROM topic WHERE title=?';
+		var desc = '';
+		db.query(sql5, [id], function(err, data){
+			if(err){
+				console.log(err); 
+				res.status(500).send('Internal Server Error:6');
+			}
+		desc = data[0].description;
+		res.render('update', {topics:files, title:id, oriTitle:id, description:desc});
+		});
 	});
 });
-	
+
+// updates db with info from user 
+app.post('/update/:id', function(req, res){
+	var oriTitle = req.body.oriTitle;
+	var updatedTitle = req.body.title; 
+	var updatedDes = req.body.description;
+	console.log('oriTitle: ' + oriTitle); 
+	console.log('updatedTitle: ' + updatedTitle); 
+	console.log('updatedDes: ' + updatedDes);
+	var str = 'UPDATE topic SET title=?, description=?, created=NOW() WHERE title=?'; 
+	db.query(str, [updatedTitle, updatedDes, oriTitle], function(err, result){
+		if (err){
+			console.log(err);
+			res.status(500).send('Internal Server Error:7');
+		}
+		res.redirect('/' + updatedTitle);
+	});
+});
 
 app.get(['/', '/:id'], function(req, res){
 	//fs.readdir('data', function(err, files){
@@ -68,7 +86,7 @@ app.get(['/', '/:id'], function(req, res){
 		}
 		var id = req.params.id; // id is title 
 		//debug purpose 
-		console.log('id: ' + id);
+		console.log('Id: ' + id);
 		if(id){
 		   // when id exists
 		   //fs.readFile('data/'+id, 'utf8', function(err, data){
@@ -79,17 +97,14 @@ app.get(['/', '/:id'], function(req, res){
 					res.status(500).send('Internal Server Error3');
 				}
 				//debug purpose
-				console.log('description: ' + data[0].description);
+				console.log('Description: ' + data[0].description);
 				res.render('view', {topics:files, title:id, description:data[0].description});
 			});
-				
-			//});
 		}else{
 		   // when id does not exists
 		   res.render('view', {topics:files, title:'Welcome!', description:'Hello, this is javascript server'});	
 		}
 	});
-	//});	
 });
 
 //app.get('/topic/:id', function(req, res){
@@ -124,10 +139,8 @@ app.post('/', function(req, res){
 		//res.send('File is created!');
 		res.redirect('/'+title);
 	});
-	//});	
 }); 
 
 app.listen(3000, function(){
 	console.log('Connected, 3000 port!');
 });
-

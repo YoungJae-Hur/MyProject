@@ -10,10 +10,12 @@ html
 				li
 					a(href='/'+val.title)= val.title
 		artcle
-			form(action='/' method='post')
+			form(action='/update/'+title  method='post')
 				p 
 					input(type='text' name='title' value=title)
+					input(type='hidden' name='oriTitle' value=oriTitle)
 				p 
-					textarea(name='description' value=description)
+					textarea(name='description')= description
 				p 
-					input(type='submit')
+					input(type='submit' value='Update')
+					
