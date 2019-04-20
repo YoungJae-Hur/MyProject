@@ -15,5 +15,9 @@ html
 					input(type='text' name='title' value='title')
 				p 
 					textarea(name='description')
+				p
+					select(name='author')
+						-for (var i = 0; i < authors.length; i++)
+							option(value="#{authors[i].id}") #{authors[i].name}
 				p 
 					input(type='submit')
