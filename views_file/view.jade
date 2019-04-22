@@ -7,6 +7,8 @@ html
 	body
 		h1 
 			a(href='/') Server Side JavaScript
+		h3
+			a(href='/author') author
 		ul
 			each val in topics
 				li
@@ -18,7 +20,7 @@ html
 			a(href='/update/'+title)
 				button(type="button") Modify 
 		div 
-			form(action=/delete/+title method='post')
+			form(action='/delete/'+title method='post')
 				button(type="submit") Delete
 		artcle
 			h2= title

@@ -7,14 +7,10 @@ var mysql = require('mysql');
 //var JSAlert = require("js-alert");
 
 //connecting to MySQL 
-var db = mysql.createConnection({
-	host: 'localhost', 
-	user: 'root',
-	password: '111111',
-	database: 'opentutorials'
-});
-db.connect();
+var db = require('./lib/mysql.template');
 
+var topic = require('./lib/topic');
+var author = require('./lib/author'); 
 // connecting to port
 app.listen(3000, function(){
 	console.log('Connected, 3000 port!');
@@ -52,13 +48,16 @@ app.get('/new', function(req, res){
 	});
 });
 
-//A method that creates a post (insertion)
+//A method that creates a post (Insertion)
 app.post('/', function(req, res){
 	var title = req.body.title;
 	var description = req.body.description; 
+	var author = req.body.author;
+	//debug
+	console.log('Author: '+author);
 	//fs.writeFile('data/' + title, description, function(err){
 	var insertStr = 'INSERT INTO topic (title, description, created, author_id) VALUES (?,?,NOW(),?)';
-	db.query(insertStr,[title, description, 'NOW()',1], function(err, result){
+	db.query(insertStr,[title, description, author], function(err, result){
 		if(err){
 			console.log(err);
 			res.status(500).send('Internal Server Error(home):1');
@@ -78,19 +77,30 @@ app.get('/update/:title', function(req, res){
 			console.log(err); 
 			res.status(500).send('Internal Server Error(update):1');
 		}
-		var title = req.params.title; // id is title 
-		var Uid = 0;
-		var sql5 = 'SELECT id, description FROM topic WHERE title=?';
-		var desc = '';
-		db.query(sql5, [title], function(err, data){
+		db.query('SELECT * FROM author', function(err, authors){
 			if(err){
 				console.log(err); 
 				res.status(500).send('Internal Server Error(update):2');
 			}
-			Uid = data[0].id;
-			desc = data[0].description;
-			res.render('update', {topics:files, id:Uid, title:title, description:desc});
-		});
+			var title = req.params.title; // id is title 
+			var Uid = 0;
+			var desc = '';
+			var author_Id = 0; 
+			var sql5 = 'SELECT id, description, author_id FROM topic WHERE title=?';
+			db.query(sql5, [title], function(err, data){
+				if(err){
+					console.log(err); 
+					res.status(500).send('Internal Server Error(update):3');
+				}
+				Uid = data[0].id;
+				desc = data[0].description;
+				author_Id = data[0].author_id;
+				//debug
+				//console.log('author_Id: ' + author_Id);
+				//console.log('authors: ' + authors[0].id + authors[1].id + authors[2].id);
+				res.render('update', {topics:files, id:Uid, title:title, description:desc, authors:authors, author_id:author_Id });
+			});
+		});	
 	});
 });
 
@@ -99,11 +109,15 @@ app.post('/update/:id', function(req, res){
 	var id = req.body.id;
 	var updatedTitle = req.body.title; 
 	var updatedDes = req.body.description;
+	var authorId = req.body.authorId; 
+	console.log('-----------------update---------------');
 	console.log('Id: ' + id); 
 	console.log('updatedTitle: ' + updatedTitle); 
 	console.log('updatedDes: ' + updatedDes);
-	var str = 'UPDATE topic SET title=?, description=?, created=NOW() WHERE id=?'; 
-	db.query(str, [updatedTitle, updatedDes, id], function(err, result){
+	console.log('authorId: ' + authorId);
+	console.log('-----------------update end---------------');
+	var str = 'UPDATE topic SET title=?, description=?, created=NOW(), author_id=? WHERE id=?'; 
+	db.query(str, [updatedTitle, updatedDes, authorId,id], function(err, result){
 		if (err){
 			console.log(err); 
 			res.status(500).send('Internal Server Error(update):3');
@@ -135,47 +149,36 @@ app.post('/delete/:title', function(req, res){
 	console.log('title: ' + title+ ' will be deleted');
 });
 
+// Main 
 app.get(['/', '/:title'], function(req, res){
 	//fs.readdir('data', function(err, files){
-	var sql1 = 'select * from topic'; 
-	db.query(sql1, function(err, files){
-		if(err){
-			console.log(err);
-			res.status(500).send('Internal Server Error(main):1');
-		}
-		var title = req.params.title; // id is title 
-		//debug purpose 
-		console.log('Title: ' + title);
-		if(title){
-		   // when id exists
-		   //fs.readFile('data/'+id, 'utf8', function(err, data){
-			var idStr = 'SELECT id FROM topic WHERE title=?';
-			db.query(idStr, [title], function(err, idResult){
-				if(err){
-					console.log(err);
-				res.status(500).send('Internal Server Error(main):2');
-				}
-				var id = idResult[0].id;
-				//var sql2 = 'SELECT description from topic WHERE title=?';
-				var sql2 = 'SELECT * FROM topic LEFT JOIN author ON topic.author_id=author.id WHERE topic.id=?'; 
-				db.query(sql2,[id],function(err, data){
-					if(err){
-						console.log(err);
-						res.status(500).send('Internal Server Error(main):3');
-					}
-					//debug purpose
-					//console.log(data);
-					console.log('Description: ' + data[0].description);
-					res.render('view_title', {topics:files, title:title, description:data[0].description, name:data[0].name});
-				});
-			});
-		   //var sql2 = 'SELECT description from topic WHERE title=?';
-		}else{
-		   // when id does not exists
-		   res.render('view', {topics:files, title:'Welcome!', description:'Hello, this is javascript server'});	
-		}
-	});
+	topic.home(req, res);
 });
+
+// showing author table 
+app.get('/author', function(req, res){
+	author.home(req, res);
+});
+
+// create an author
+app.post('/author/create', function(req, res){
+	author.create(req, res);
+});
+
+// directing to updating an author's profile
+app.get('/author/update/:id', function(req, res){
+	author.update(req, res);
+});
+
+// updates an author's profile or name
+app.post('/author/update_process', function(req, res){
+	author.update_process(req, res);
+});
+
+// deletes an author's info
+app.post('/author/delete', function(req, res){
+	author.delete(req, res);
+}); 
 
 //app.get('/topic/:id', function(req, res){
 //	var id = req.params.id;

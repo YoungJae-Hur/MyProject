@@ -1,0 +1,54 @@
+doctype html
+html
+	head
+		meta(charset='utf-8')
+		//script(src="dist/popupS.min.js") 
+		//link(href='css/table.css', rel='stylesheet')
+		style
+			include table.css
+	body
+		h1 
+			a(href='/') Server Side JavaScript
+		h3
+			a(href='/author') author
+		ul
+			each val in topics
+				li
+					a(href='/'+val.title)= val.title
+		div 
+			a(href='/new') 
+				button(type="button") Create new post
+		div 	
+			a(href='/update/'+title)
+				button(type="button") Modify 
+		div 
+			form(action=/delete/+title method='post')
+				button(type="submit") Delete
+		div 
+			table 
+				thead 
+					tr 
+						td Name 
+						td Profile 
+						td Update
+						td Delete
+				tbody
+					each val in authors 
+						tr 
+							td #{val.name} 
+							td #{val.profile}
+							td 
+								a(href='/author/update/'+val.id) update 
+							td 
+								form(action='/author/delete' method='post')
+									input(type='hidden' name='id' value=val.id)
+									input(type='submit' value='delete')
+									//a(href='/author/update/'+val.id) delete
+		div 
+			form(action='/author/create' method='post')
+				p 
+					input(type='text' name='name' placeholder='Name')
+				p 
+					textarea(name='profile' placeholder='Description')
+				p 
+					input(type='submit' value='Submit')
