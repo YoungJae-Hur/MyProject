@@ -13,7 +13,7 @@ app.get('/form', function(req, res){
 	res.render('form');
 });
 
-// form_receiver의 라우팅 생성 (get method)
+// creates a router for form_receiver (w/ get method)
 app.get('/form_receiver', function(req, res){
 	var title = req.query.title;
 	var description = req.query.description;
